@@ -20,6 +20,8 @@
 // _negative_ clock edges: halfway between the positive clock edges.
 // This avoids race conditions between the test bench and the module
 // under test.
+//
+// Run with: make hw1.run OR iverilog -o hw1.vvp hw1.v
 
 module multiplier_tb();
 
@@ -32,18 +34,32 @@ module multiplier_tb();
   multiplier m(clk, a, b, x);
 
   // *** Create an `always` task which inverts the clock every 5 ticks.
-  // always ...
+  always #5 clk = ~clk;
 
   // *** Fill in test code in this `always` task.
-  //always begin
+  always @(negedge clk) begin
     // Wait for two clock cycles.
+    #20;
 
     // Check that a * b == x, if not, show an error message and finish.
+    // `!==` provides structural equality.
+    if ((a*b) !== x) begin
+      $display("Error! %d != %d", a*b, x);
+      $finish;
+    end
 
     // Increment a.
+    a = a+8'b1;
     // If a loops back to 0, increment b.
-    // If b loops back to 0, show a success message and finish.
-  //end
+    if (!a) begin
+      b = b+8'b1;
+      // If b loops back to 0, show a success message and finish.
+      if (!b) begin
+        $display("Success!");
+        $finish;
+      end
+    end
+  end
 
 endmodule
 
