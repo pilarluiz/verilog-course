@@ -39,7 +39,7 @@ module multiplier_tb();
   // *** Fill in test code in this `always` task.
   always @(negedge clk) begin
     // Wait for two clock cycles.
-    #20;
+    @(negedge clk);
 
     // Check that a * b == x, if not, show an error message and finish.
     // `!==` provides structural equality.
