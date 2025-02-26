@@ -37,29 +37,36 @@ module multiplier_tb();
   always #5 clk = ~clk;
 
   // *** Fill in test code in this `always` task.
-  always @(negedge clk) begin
+  always begin
     // Wait for two clock cycles.
+    // Note: this logic is not synthesizable! Only works for TB. 
     @(negedge clk);
 
+    @(negedge clk)
     // Check that a * b == x, if not, show an error message and finish.
     // `!==` provides structural equality.
-    if ((a*b) !== x) begin
+    if (a * b !== x) begin
       $display("Error! %d != %d", a*b, x);
       $finish;
     end
 
     // Increment a.
-    a = a+8'b1;
+    a = a + 1; 
     // If a loops back to 0, increment b.
-    if (!a) begin
-      b = b+8'b1;
+    if (!a) b = b + 1;
+    if (!a && !b) begin
       // If b loops back to 0, show a success message and finish.
-      if (!b) begin
-        $display("Success!");
-        $finish;
-      end
+      $display("Success!");
+      $finish;
     end
   end
+
+  // View waveforms with `gtkwave hw1.vcd`.
+  initial begin
+    $dumpfile("hw1.vcd");
+    $dumpvars;
+  end
+
 
 endmodule
 
