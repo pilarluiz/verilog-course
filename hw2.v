@@ -1,10 +1,12 @@
+// Run with: make hw2.prog
+
 module hw2(
   input CLK,
   input BTN_N,
   output LEDR_N,
   output LEDG_N,
   output reg [0:6] SEG_C,
-  output wire SEG_AN,
+  output wire SEG_AN
 );
 
   // PART ONE
@@ -27,7 +29,7 @@ module hw2(
 
   // Second, assign LEDG based on the value of the counter.
 
-  assign LEDG_N = counter[0];
+  assign LEDG_N = counter[23] | counter[22];
 
   // Experiment with changing the blinking pattern!  (e.g. 25% on, 75% off)
 
@@ -83,11 +85,12 @@ module hw2(
 
   reg was_pressed = 0;
 
-  always @(posedge CLK)
+  always @(posedge CLK) begin
     was_pressed <= !BTN_N;
 
     if (!BTN_N && !was_pressed) 
-      digit <= digit + 1; 
+      digit <= digit + 1;
+  end
 
   // BONUS: Add a second digit!
 
