@@ -21,7 +21,7 @@ module hw2(
 
   // First, define a counter based off of CLK.
 
-  reg [15:0] counter = 0;
+  reg [23:0] counter = 0;
   always @(posedge CLK) begin
     counter <= counter + 1;
   end
@@ -54,12 +54,13 @@ module hw2(
   // Note that a "1" bit turns the segment OFF, "0" turns the segment ON.
 
   // SEG_AN is the index on the LCD display. 0 = left digit, 1 = right digit
-  assign SEG_AN = 1'b1;
+  // Need SEG_AN to alternate between indexes.
+  assign SEG_AN = counter[15];
 
-  reg [3:0] digit = 3;
+  reg [7:0] digit = 0;
 
   always @(digit)
-    case (digit)
+    case (SEG_AN ? digit[3:0] : digit[7:4])
       'h0 : SEG_C = 7'b0000001;
       'h1 : SEG_C = 7'b1001111;
       'h2 : SEG_C = 7'b0010010;
