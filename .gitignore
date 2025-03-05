@@ -1,2 +1,4 @@
 *.bin
+*.vvp
+*.vcd
 .DS_Store
