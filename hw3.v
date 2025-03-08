@@ -39,13 +39,15 @@ module hw3(
   // First, let's make `rx_busy` visible on an LED.
   // It will blink whenever there's UART activity.
 
-  // assign ...
+  assign LEDG_N = ~rx_busy;
 
 
   // Now, set `rx_ready` to be true whenever the button is pressed.
   // This will allow you to push the button to "consume" data.
 
-  // always @(posedge CLK) ...
+  // always @(posedge CLK) begin
+  //   rx_ready <= ~BTN_N;
+  // end
 
 
   // Now, instantiate the `dual_seven_seg` module below.
@@ -53,7 +55,13 @@ module hw3(
   // Connect its `enable` port to `rx_valid`: this will make the display visible
   // only when the data is valid.
 
-  // dual_seven_seg ...
+  dual_seven_seg dss(
+    .clk(CLK),
+    .digits(rx_data),
+    .seg_an(SEG_AN),
+    .seg_c(SEG_C),
+    .enable(1'b1 /*rx_valid*/)
+  );
 
 
   // At this point, you can test using minicom!
@@ -62,11 +70,11 @@ module hw3(
   // Next, create a "rot13" module and instantiate it here.
   // See the skeleton definition below!
 
-  // wire [7:0] rot13_data;
-  // rot13 r13(.in(rx_data), .out(rot13_data));
+  wire [7:0] rot13_data;
+  rot13 r13(.in(rx_data), .out(rot13_data));
 
 
-  // Finally, we can instantiate `uart_tx`.  It's alreayd here doing nothing,
+  // Finally, we can instantiate `uart_tx`.  It's already here doing nothing,
   // you'll just need to wire it up as detailed below.
 
   wire tx_ready, tx_busy;
@@ -79,20 +87,21 @@ module hw3(
 
     .busy(tx_busy),
 
-    .data(8'b0),  // wire this to `rot13_data`
-    .valid(1'b0),  // wire this to `rx_valid`
+    .data(rot13_data),
+    .valid(rx_valid | ~BTN_N),
     .ready(tx_ready),
 
-    .prescale(12000000 / (9600*8)),
+    .prescale(12000000 / (9600*8))
   );
 
   // Let's make `tx_busy` visible on an LED.
-  // assign ...
+  assign LEDR_N = ~tx_busy;
 
   // Finally, set `rx_ready` from `tx_ready`.
   // NOTE: You'll want to comment out the code that sets it from the button!
 
-  // always @* ...
+  always @*
+    rx_ready = tx_ready;
 
 endmodule
 
@@ -103,6 +112,8 @@ endmodule
 
 module rot13(
   // declare your input and output here... both 8-bit values
+  input [7:0] in,
+  output [7:0] out
 );
 
   always @* begin
@@ -110,6 +121,13 @@ module rot13(
     // First, if the input is between "A" and "M", the output is the input plus 13.
     // Second, if the input is between "N" and "Z", the output is the input minus 13.
     // Otherwise, the output is just the input unchanged!
+
+    if ((in >= "A" && in <= "M") || (in >= "a" && in <= "m"))
+      out = in + 13;
+    else if ((in >= "N" && in <= "Z") || (in >= "n" && in <= "z"))
+      out = in - 13;
+    else
+      out = in;
   end
 
 endmodule
